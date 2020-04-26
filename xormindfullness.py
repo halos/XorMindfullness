@@ -44,6 +44,12 @@ class XM:
 
         return args
 
+    # Function to detect same reg but different reg size
+    # ecx = exc and ebx = bx and eax = ah
+    def same_reg(self, d1, d2):
+
+        return d1[-2:][0] == d2[-2:][0]
+
     ## Checkers ##
 
     # xor A, A
@@ -65,11 +71,12 @@ class XM:
         # xor A, B
         if seems_mov and x2["type"] == "xor":
             arg_1_x2, arg_2_x2 = self.get_xor_args(x2)
-            if arg_1_x2 != arg_2_x2 and arg_1_x2 == arg_1_x1:
+            if arg_1_x2 != arg_2_x2 and self.same_reg(arg_1_x2, arg_1_x1):
                 dst = arg_1_x2
                 src = arg_2_x2
                 instr_count = 2
                 self.r2_out.cmd(f"s {self.curr_offset()}")
+                # TODO: potential error not clearing high nibble
                 self.r2_out.cmd(f"\"wa mov {dst},{src};nop;nop\"")
                 print(f"[i] 0x{self.curr_offset():x} - mov {dst},{src}")
 
